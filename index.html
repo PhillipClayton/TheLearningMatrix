@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schoolwork Hub</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Schoolwork Hub</h1>
+    <p>Track progress and access your study tools</p>
+  </header>
+
+  <nav>
+    <!-- Your custom sites -->
+    <a href="https://phillipclayton.github.io/TubularTutor" target="_blank">Tubular Tutor</a>
+    <a href="https://phillipclayton.github.io/spellmaster" target="_blank">Spellmaster</a>
+    <a href="https://phillipclayton.github.io/arithmagician" target="_blank">Arithmagician</a>
+
+    <!-- External study sites -->
+    <a href="https://www.khanacademy.org/" target="_blank">Khan Academy</a>
+    <a href="https://www.codecademy.com/" target="_blank">Codecademy</a>
+    <a href="https://www.duolingo.com/" target="_blank">Duolingo</a>
+    <a href="https://www.ratatype.com/" target="_blank">Ratatype</a>
+    <a href="https://monkeytype.com/" target="_blank">Monkey Type</a>
+  </nav>
+
+  <main>
+    <h2>Submit Progress</h2>
+
+    <!-- Student selection -->
+    <label for="student-select">Select Student:</label>
+    <select id="student-select">
+      <option value="">-- Choose a student --</option>
+      <option value="evelyn">Evelyn</option>
+      <option value="amandalynn">Amanda Lynn</option>
+      <option value="henry">Henry</option>
+      <option value="mali">Mali</option>
+    </select>
+
+    <!-- Forms (hidden until chosen) -->
+    <form id="progress-form-evelyn" class="progress-form hidden">
+      <h3>Evelyn’s Progress</h3>
+      <label for="evelyn-class">Select Class</label>
+      <select id="evelyn-class" required>
+        <option value="">-- Choose a class --</option>
+        <option value="History">History</option>
+        <option value="Math">Math</option>
+        <option value="Science">Science</option>
+        <option value="English">English</option>
+      </select>
+
+      <label for="evelyn-progress">What did you work on?</label>
+      <textarea id="evelyn-progress" rows="5" required></textarea>
+      <button type="submit">Send Evelyn’s Report</button>
+    </form>
+
+    <form id="progress-form-amandalynn" class="progress-form hidden">
+      <h3>Amanda Lynn’s Progress</h3>
+      <label for="amandalynn-class">Select Class</label>
+      <select id="amandalynn-class" required>
+        <option value="">-- Choose a class --</option>
+        <option value="Math">Math</option>
+        <option value="Computer Science">Computer Science</option>
+        <option value="Spanish">Spanish</option>
+      </select>
+
+      <label for="amandalynn-progress">What did you work on?</label>
+      <textarea id="amandalynn-progress" rows="5" required></textarea>
+      <button type="submit">Send Amanda Lynn’s Report</button>
+    </form>
+
+    <form id="progress-form-henry" class="progress-form hidden">
+      <h3>Henry’s Progress</h3>
+      <label for="henry-class">Select Class</label>
+      <select id="henry-class" required>
+        <option value="">-- Choose a class --</option>
+        <option value="English">English</option>
+        <option value="Biology">Biology</option>
+        <option value="Art">Art</option>
+      </select>
+
+      <label for="henry-progress">What did you work on?</label>
+      <textarea id="henry-progress" rows="5" required></textarea>
+      <button type="submit">Send Henry’s Report</button>
+    </form>
+
+    <form id="progress-form-mali" class="progress-form hidden">
+        <h3>Mali's Progress</h3>
+        <label for="mali-class">Select Class</label>
+        <select id="mali-class" required>
+          <option value="">-- Choose a class --</option>
+          <option value="English">English</option>
+          <option value="Biology">Biology</option>
+          <option value="Art">Art</option>
+        </select>
+  
+        <label for="mali-progress">What did you work on?</label>
+        <textarea id="mali-progress" rows="5" required></textarea>
+        <button type="submit">Send Mali's Report</button>
+      </form>
+
+    <p id="status"></p>
+  </main>
+
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2.4.1/dist/email.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
