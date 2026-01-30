@@ -53,9 +53,49 @@ body {
   
   form button:hover { background: #45a049; }
   
-  #status {
+  #status, .status {
     margin-top: 1em;
     font-weight: bold;
+  }
+
+  .error {
+    color: #c00;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 300px;
+    margin: 1em 0;
+    max-width: 100%;
+  }
+
+  #progress-chart {
+    max-width: 100%;
+  }
+
+  .secondary {
+    margin-top: 1em;
+    background: #666;
+    color: white;
+    padding: 0.5em 1em;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .secondary:hover {
+    background: #555;
+  }
+
+  #admin-students ul,
+  #admin-courses ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  #admin-students li,
+  #admin-courses li {
+    padding: 0.3em 0;
   }
 
   .hidden {

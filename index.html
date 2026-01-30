@@ -13,12 +13,9 @@
   </header>
 
   <nav>
-    <!-- Your custom sites -->
     <a href="https://phillipclayton.github.io/TubularTutor" target="_blank">Tubular Tutor</a>
     <a href="https://phillipclayton.github.io/spellmaster" target="_blank">Spellmaster</a>
     <a href="https://phillipclayton.github.io/arithmagician" target="_blank">Arithmagician</a>
-
-    <!-- External study sites -->
     <a href="https://www.khanacademy.org/" target="_blank">Khan Academy</a>
     <a href="https://www.codecademy.com/" target="_blank">Codecademy</a>
     <a href="https://www.duolingo.com/" target="_blank">Duolingo</a>
@@ -27,85 +24,49 @@
   </nav>
 
   <main>
-    <h2>Submit Progress</h2>
-
-    <!-- Student selection -->
-    <label for="student-select">Select Student:</label>
-    <select id="student-select">
-      <option value="">-- Choose a student --</option>
-      <option value="evelyn">Evelyn</option>
-      <option value="amandalynn">Amanda Lynn</option>
-      <option value="henry">Henry</option>
-      <option value="mali">Mali</option>
-    </select>
-
-    <!-- Forms (hidden until chosen) -->
-    <form id="progress-form-evelyn" class="progress-form hidden">
-      <h3>Evelyn’s Progress</h3>
-      <label for="evelyn-class">Select Class</label>
-      <select id="evelyn-class" required>
-        <option value="">-- Choose a class --</option>
-        <option value="History">History</option>
-        <option value="Math">Math</option>
-        <option value="Science">Science</option>
-        <option value="English">English</option>
-      </select>
-
-      <label for="evelyn-progress">What did you work on?</label>
-      <textarea id="evelyn-progress" rows="5" required></textarea>
-      <button type="submit">Send Evelyn’s Report</button>
-    </form>
-
-    <form id="progress-form-amandalynn" class="progress-form hidden">
-      <h3>Amanda Lynn’s Progress</h3>
-      <label for="amandalynn-class">Select Class</label>
-      <select id="amandalynn-class" required>
-        <option value="">-- Choose a class --</option>
-        <option value="Math">Math</option>
-        <option value="Computer Science">Computer Science</option>
-        <option value="Spanish">Spanish</option>
-      </select>
-
-      <label for="amandalynn-progress">What did you work on?</label>
-      <textarea id="amandalynn-progress" rows="5" required></textarea>
-      <button type="submit">Send Amanda Lynn’s Report</button>
-    </form>
-
-    <form id="progress-form-henry" class="progress-form hidden">
-      <h3>Henry’s Progress</h3>
-      <label for="henry-class">Select Class</label>
-      <select id="henry-class" required>
-        <option value="">-- Choose a class --</option>
-        <option value="English">English</option>
-        <option value="Biology">Biology</option>
-        <option value="Art">Art</option>
-      </select>
-
-      <label for="henry-progress">What did you work on?</label>
-      <textarea id="henry-progress" rows="5" required></textarea>
-      <button type="submit">Send Henry’s Report</button>
-    </form>
-
-    <form id="progress-form-mali" class="progress-form hidden">
-        <h3>Mali's Progress</h3>
-        <label for="mali-class">Select Class</label>
-        <select id="mali-class" required>
-          <option value="">-- Choose a class --</option>
-          <option value="English">English</option>
-          <option value="Biology">Biology</option>
-          <option value="Art">Art</option>
-        </select>
-  
-        <label for="mali-progress">What did you work on?</label>
-        <textarea id="mali-progress" rows="5" required></textarea>
-        <button type="submit">Send Mali's Report</button>
+    <!-- Login (shown when not authenticated) -->
+    <section id="login-section">
+      <h2>Log in</h2>
+      <form id="login-form">
+        <label for="login-username">Username</label>
+        <input type="text" id="login-username" required autocomplete="username" />
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" required autocomplete="current-password" />
+        <button type="submit">Log in</button>
       </form>
+      <p id="login-error" class="error hidden"></p>
+    </section>
 
-    <p id="status"></p>
+    <!-- Student view (form + chart) -->
+    <section id="student-section" class="hidden">
+      <h2>Submit Progress</h2>
+      <p>Logged in as <strong id="student-name"></strong></p>
+      <form id="progress-form">
+        <div id="progress-fields"></div>
+        <button type="submit">Submit progress</button>
+      </form>
+      <p id="progress-status" class="status"></p>
+      <h3>Progress over time</h3>
+      <div class="chart-container">
+        <canvas id="progress-chart"></canvas>
+      </div>
+      <button type="button" id="logout-btn" class="secondary">Log out</button>
+    </section>
+
+    <!-- Admin view -->
+    <section id="admin-section" class="hidden">
+      <h2>Admin</h2>
+      <p>Logged in as admin.</p>
+      <h3>Students</h3>
+      <div id="admin-students"></div>
+      <h3>Courses</h3>
+      <div id="admin-courses"></div>
+      <button type="button" id="admin-logout-btn" class="secondary">Log out</button>
+    </section>
   </main>
 
-  <!-- EmailJS -->
-  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2.4.1/dist/email.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
