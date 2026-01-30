@@ -83,7 +83,7 @@
       return;
     }
     try {
-      const me = await api("/api/me");
+      const me = await api("/api/auth/me");
       if (me.role === "admin") {
         showView("admin");
         loadAdmin();
@@ -150,14 +150,14 @@
     }
     statusEl.textContent = submitted ? "Progress saved." : "Enter at least one percentage.";
     statusEl.classList.remove("error");
-    const me = await api("/api/me");
+    const me = await api("/api/auth/me");
     if (me.studentId) await loadProgressChart(me.studentId);
   });
 
   async function loadProgressChart(studentId) {
     if (!studentId) return;
     const progress = await api("/api/students/" + studentId + "/progress");
-    const courses = await api("/api/me").then((me) => me.courses || []);
+    const courses = await api("/api/auth/me").then((me) => me.courses || []);
     const byCourse = {};
     courses.forEach((c) => {
       byCourse[c.id] = { name: c.name, color: c.color || "#666", points: [] };
@@ -246,9 +246,9 @@
     showView("login");
   });
 
-  loadApp();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadApp);
+  } else {
+    loadApp();
+  }
 })();
-</think>
-Fixing the syntax error in `script.js`.
-<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>
-StrReplace
