@@ -95,7 +95,72 @@ body {
 
   #admin-students li,
   #admin-courses li {
-    padding: 0.3em 0;
+    padding: 0.5em 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .admin-item-name {
+    margin-right: 0.5em;
+  }
+
+  .admin-btn {
+    margin-left: 0.3em;
+    padding: 0.25em 0.6em;
+    font-size: 0.9em;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .admin-btn.edit-student-btn,
+  .admin-btn.edit-course-btn {
+    background: #2196F3;
+    color: white;
+  }
+
+  .admin-btn.delete-student-btn,
+  .admin-btn.delete-course-btn {
+    background: #f44336;
+    color: white;
+  }
+
+  .admin-btn:hover {
+    opacity: 0.9;
+  }
+
+  .admin-edit-form label {
+    display: block;
+    margin-top: 0.5em;
+  }
+
+  .admin-edit-form input[type="text"],
+  .admin-edit-form input[type="password"] {
+    width: 100%;
+    padding: 0.4em;
+    margin-top: 0.2em;
+  }
+
+  .admin-edit-form .admin-course-checks label {
+    display: inline-block;
+    margin-right: 1em;
+    margin-top: 0.3em;
+  }
+
+  .admin-edit-form button {
+    margin-top: 0.5em;
+    margin-right: 0.5em;
+  }
+
+  .admin-cancel-btn {
+    background: #666;
+    color: white;
+  }
+
+  #admin-add-student-form,
+  #admin-add-course-form {
+    margin-bottom: 1em;
+    padding-bottom: 1em;
+    border-bottom: 1px solid #eee;
   }
 
   .hidden {

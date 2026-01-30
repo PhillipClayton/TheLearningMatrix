@@ -219,27 +219,251 @@
     showView("login");
   });
 
+  function showAdminMessage(elId, msg, isError) {
+    const el = document.getElementById(elId);
+    el.textContent = msg || "";
+    el.classList.toggle("hidden", !msg);
+    el.classList.toggle("error", !!isError);
+  }
+
   async function loadAdmin() {
     try {
       const [students, courses] = await Promise.all([
         api("/api/admin/students"),
         api("/api/admin/courses"),
       ]);
-      const studentsEl = document.getElementById("admin-students");
-      studentsEl.innerHTML =
-        "<ul>" +
-        students.map((s) => "<li>" + s.display_name + " (" + s.username + ")</li>").join("") +
-        "</ul>";
-      const coursesEl = document.getElementById("admin-courses");
-      coursesEl.innerHTML =
-        "<ul>" +
-        courses.map((c) => "<li>" + c.name + (c.color ? " " + c.color : "") + "</li>").join("") +
-        "</ul>";
+      renderAdminStudents(students, courses);
+      renderAdminCourses(courses);
+      showAdminMessage("admin-students-message", "");
+      showAdminMessage("admin-courses-message", "");
     } catch (err) {
       document.getElementById("admin-students").innerHTML =
         "<p class='error'>Failed to load: " + (err.data?.error || err.message) + "</p>";
     }
   }
+
+  function renderAdminStudents(students, courses) {
+    const container = document.getElementById("admin-students");
+    container.innerHTML = "";
+    const ul = document.createElement("ul");
+    ul.className = "admin-list";
+    students.forEach((s) => {
+      const li = document.createElement("li");
+      li.dataset.studentId = s.id;
+      li.dataset.userId = s.user_id;
+      li.innerHTML =
+        "<span class='admin-item-name'>" +
+        escapeHtml(s.display_name) +
+        " (" +
+        escapeHtml(s.username) +
+        ")</span> " +
+        "<button type='button' class='admin-btn edit-student-btn'>Edit</button> " +
+        "<button type='button' class='admin-btn delete-student-btn'>Delete</button>";
+      ul.appendChild(li);
+    });
+    container.appendChild(ul);
+
+    container.querySelectorAll(".edit-student-btn").forEach((btn) => {
+      btn.addEventListener("click", () => onEditStudent(btn.closest("li"), students, courses));
+    });
+    container.querySelectorAll(".delete-student-btn").forEach((btn) => {
+      btn.addEventListener("click", () => onDeleteStudent(btn.closest("li")));
+    });
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function onEditStudent(li, students, courses) {
+    const studentId = parseInt(li.dataset.studentId, 10);
+    const userId = parseInt(li.dataset.userId, 10);
+    const s = students.find((x) => x.id === studentId);
+    if (!s) return;
+    const studentCourses = await api("/api/students/" + studentId + "/courses");
+    const studentCourseIds = studentCourses.map((c) => c.id);
+
+    const form = document.createElement("form");
+    form.className = "admin-edit-form";
+    form.innerHTML =
+      "<label>Username</label><input type='text' name='username' value=\"" +
+      escapeHtml(s.username) +
+      "\" required />" +
+      "<label>New password (leave blank to keep)</label><input type='password' name='password' placeholder='Leave blank to keep' />" +
+      "<label>Display name</label><input type='text' name='displayName' value=\"" +
+      escapeHtml(s.display_name) +
+      "\" required />" +
+      "<label>Courses</label><div class='admin-course-checks'></div>" +
+      "<button type='submit'>Save</button> <button type='button' class='admin-cancel-btn'>Cancel</button>";
+    const checksContainer = form.querySelector(".admin-course-checks");
+    courses.forEach((c) => {
+      const label = document.createElement("label");
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.name = "courseIds";
+      input.value = c.id;
+      input.checked = studentCourseIds.includes(c.id);
+      label.appendChild(input);
+      label.appendChild(document.createTextNode(" " + c.name));
+      checksContainer.appendChild(label);
+    });
+    li.innerHTML = "";
+    li.appendChild(form);
+
+    form.querySelector(".admin-cancel-btn").addEventListener("click", () => loadAdmin());
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = form.username.value.trim();
+      const password = form.password.value;
+      const displayName = form.displayName.value.trim();
+      const courseIds = Array.from(form.querySelectorAll("input[name=courseIds]:checked")).map((el) =>
+        parseInt(el.value, 10)
+      );
+      try {
+        await api("/api/admin/users/" + userId, {
+          method: "PATCH",
+          body: JSON.stringify({ username, password: password || undefined }),
+        });
+        await api("/api/admin/students/" + studentId, {
+          method: "PATCH",
+          body: JSON.stringify({ displayName, courseIds }),
+        });
+        showAdminMessage("admin-students-message", "Student updated.", false);
+        loadAdmin();
+      } catch (err) {
+        showAdminMessage("admin-students-message", err.data?.error || err.message, true);
+      }
+    });
+  }
+
+  async function onDeleteStudent(li) {
+    if (!confirm("Delete this student and their progress? This cannot be undone.")) return;
+    const studentId = parseInt(li.dataset.studentId, 10);
+    try {
+      await api("/api/admin/students/" + studentId, { method: "DELETE" });
+      showAdminMessage("admin-students-message", "Student deleted.", false);
+      loadAdmin();
+    } catch (err) {
+      showAdminMessage("admin-students-message", err.data?.error || err.message, true);
+    }
+  }
+
+  function renderAdminCourses(courses) {
+    const container = document.getElementById("admin-courses");
+    container.innerHTML = "";
+    const ul = document.createElement("ul");
+    ul.className = "admin-list";
+    courses.forEach((c) => {
+      const li = document.createElement("li");
+      li.dataset.courseId = c.id;
+      li.innerHTML =
+        "<span class='admin-item-name'>" +
+        escapeHtml(c.name) +
+        (c.color ? " <span style='color:" + escapeHtml(c.color) + "'>" + escapeHtml(c.color) + "</span>" : "") +
+        "</span> " +
+        "<button type='button' class='admin-btn edit-course-btn'>Edit</button> " +
+        "<button type='button' class='admin-btn delete-course-btn'>Delete</button>";
+      ul.appendChild(li);
+    });
+    container.appendChild(ul);
+
+    container.querySelectorAll(".edit-course-btn").forEach((btn) => {
+      btn.addEventListener("click", () => onEditCourse(btn.closest("li"), courses));
+    });
+    container.querySelectorAll(".delete-course-btn").forEach((btn) => {
+      btn.addEventListener("click", () => onDeleteCourse(btn.closest("li")));
+    });
+  }
+
+  function onEditCourse(li, courses) {
+    const courseId = parseInt(li.dataset.courseId, 10);
+    const c = courses.find((x) => x.id === courseId);
+    if (!c) return;
+    const form = document.createElement("form");
+    form.className = "admin-edit-form";
+    form.innerHTML =
+      "<label>Course name</label><input type='text' name='name' value=\"" +
+      escapeHtml(c.name) +
+      "\" required />" +
+      "<label>Color (e.g. #4CAF50)</label><input type='text' name='color' value=\"" +
+      escapeHtml(c.color || "") +
+      "\" />" +
+      "<button type='submit'>Save</button> <button type='button' class='admin-cancel-btn'>Cancel</button>";
+    li.innerHTML = "";
+    li.appendChild(form);
+
+    form.querySelector(".admin-cancel-btn").addEventListener("click", () => loadAdmin());
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = form.name.value.trim();
+      const color = form.color.value.trim() || null;
+      try {
+        await api("/api/admin/courses/" + courseId, {
+          method: "PATCH",
+          body: JSON.stringify({ name, color }),
+        });
+        showAdminMessage("admin-courses-message", "Course updated.", false);
+        loadAdmin();
+      } catch (err) {
+        showAdminMessage("admin-courses-message", err.data?.error || err.message, true);
+      }
+    });
+  }
+
+  async function onDeleteCourse(li) {
+    if (!confirm("Delete this course? Student progress for this course will be removed. This cannot be undone."))
+      return;
+    const courseId = parseInt(li.dataset.courseId, 10);
+    try {
+      await api("/api/admin/courses/" + courseId, { method: "DELETE" });
+      showAdminMessage("admin-courses-message", "Course deleted.", false);
+      loadAdmin();
+    } catch (err) {
+      showAdminMessage("admin-courses-message", err.data?.error || err.message, true);
+    }
+  }
+
+  document.getElementById("admin-add-student-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const username = document.getElementById("add-username").value.trim();
+    const password = document.getElementById("add-password").value;
+    const displayName = document.getElementById("add-display-name").value.trim();
+    try {
+      await api("/api/admin/students", {
+        method: "POST",
+        body: JSON.stringify({ username, password, displayName }),
+      });
+      document.getElementById("add-username").value = "";
+      document.getElementById("add-password").value = "";
+      document.getElementById("add-display-name").value = "";
+      showAdminMessage("admin-students-message", "Student added.", false);
+      loadAdmin();
+    } catch (err) {
+      showAdminMessage("admin-students-message", err.data?.error || err.message, true);
+    }
+  });
+
+  document.getElementById("admin-add-course-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("add-course-name").value.trim();
+    const color = document.getElementById("add-course-color").value.trim() || null;
+    try {
+      await api("/api/admin/courses", {
+        method: "POST",
+        body: JSON.stringify({ name, color }),
+      });
+      document.getElementById("add-course-name").value = "";
+      document.getElementById("add-course-color").value = "";
+      showAdminMessage("admin-courses-message", "Course added.", false);
+      loadAdmin();
+    } catch (err) {
+      showAdminMessage("admin-courses-message", err.data?.error || err.message, true);
+    }
+  });
 
   document.getElementById("admin-logout-btn").addEventListener("click", () => {
     setToken(null);

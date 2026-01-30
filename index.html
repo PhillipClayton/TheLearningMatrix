@@ -57,10 +57,31 @@
     <section id="admin-section" class="hidden">
       <h2>Admin</h2>
       <p>Logged in as admin.</p>
+
       <h3>Students</h3>
+      <form id="admin-add-student-form">
+        <label for="add-username">Username</label>
+        <input type="text" id="add-username" required />
+        <label for="add-password">Password</label>
+        <input type="password" id="add-password" required />
+        <label for="add-display-name">Display name</label>
+        <input type="text" id="add-display-name" required />
+        <button type="submit">Add student</button>
+      </form>
+      <p id="admin-students-message" class="status hidden"></p>
       <div id="admin-students"></div>
+
       <h3>Courses</h3>
+      <form id="admin-add-course-form">
+        <label for="add-course-name">Course name</label>
+        <input type="text" id="add-course-name" required />
+        <label for="add-course-color">Color (e.g. #4CAF50)</label>
+        <input type="text" id="add-course-color" placeholder="#4CAF50" />
+        <button type="submit">Add course</button>
+      </form>
+      <p id="admin-courses-message" class="status hidden"></p>
       <div id="admin-courses"></div>
+
       <button type="button" id="admin-logout-btn" class="secondary">Log out</button>
     </section>
   </main>
