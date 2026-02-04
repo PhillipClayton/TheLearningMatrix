@@ -9,6 +9,7 @@
   const ON_TRACK_END = new Date("2026-05-22T00:00:00Z");
 
   let progressChart = null;
+  let adminProgressChart = null;
 
   function getToken() {
     return localStorage.getItem(TOKEN_KEY);
@@ -234,11 +235,122 @@
       ]);
       renderAdminStudents(students, courses);
       renderAdminCourses(courses);
+      populateAdminStudentSelect(students);
       showAdminMessage("admin-students-message", "");
       showAdminMessage("admin-courses-message", "");
     } catch (err) {
       document.getElementById("admin-students").innerHTML =
         "<p class='error'>Failed to load: " + (err.data?.error || err.message) + "</p>";
+    }
+  }
+
+  function populateAdminStudentSelect(students) {
+    const select = document.getElementById("admin-student-select");
+    select.innerHTML = "";
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Select a student…";
+    select.appendChild(placeholder);
+    students.forEach((s) => {
+      const opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = (s.display_name || s.username) + " (" + s.username + ")";
+      select.appendChild(opt);
+    });
+    if (adminProgressChart) {
+      adminProgressChart.destroy();
+      adminProgressChart = null;
+    }
+  }
+
+  async function onAdminStudentSelectChange() {
+    const select = document.getElementById("admin-student-select");
+    const studentId = select.value ? parseInt(select.value, 10) : null;
+    if (!studentId) {
+      if (adminProgressChart) {
+        adminProgressChart.destroy();
+        adminProgressChart = null;
+      }
+      setAdminProgressChartMessage("", false);
+      return;
+    }
+    await loadAdminProgressChart(studentId);
+  }
+
+  function setAdminProgressChartMessage(msg, isError) {
+    const el = document.getElementById("admin-progress-chart-message");
+    el.textContent = msg || "";
+    el.classList.toggle("hidden", !msg);
+    el.classList.toggle("error", !!isError);
+  }
+
+  async function loadAdminProgressChart(studentId) {
+    const canvas = document.getElementById("admin-progress-chart");
+    if (adminProgressChart) {
+      adminProgressChart.destroy();
+      adminProgressChart = null;
+    }
+    setAdminProgressChartMessage("Loading…", false);
+    try {
+      const [progress, courses] = await Promise.all([
+        api("/api/students/" + studentId + "/progress"),
+        api("/api/students/" + studentId + "/courses"),
+      ]);
+      setAdminProgressChartMessage("", false);
+      const byCourse = {};
+      courses.forEach((c) => {
+        byCourse[c.id] = { name: c.name, color: c.color || "#666", points: [] };
+      });
+      progress.forEach((p) => {
+        if (byCourse[p.course_id]) {
+          byCourse[p.course_id].points.push({
+            x: new Date(p.recorded_at).getTime(),
+            y: parseFloat(p.percentage),
+          });
+        }
+      });
+      const datasets = Object.entries(byCourse).map(([id, d]) => ({
+        label: d.name,
+        data: d.points.sort((a, b) => a.x - b.x),
+        borderColor: d.color,
+        backgroundColor: d.color + "20",
+        fill: false,
+        tension: 0.2,
+      }));
+      const onTrackPoints = [
+        { x: ON_TRACK_START.getTime(), y: 0 },
+        { x: ON_TRACK_END.getTime(), y: 100 },
+      ];
+      datasets.push({
+        label: "On track (target)",
+        data: onTrackPoints,
+        borderColor: "#999",
+        borderDash: [5, 5],
+        fill: false,
+        pointRadius: 0,
+        tension: 0,
+      });
+      adminProgressChart = new Chart(canvas, {
+        type: "line",
+        data: { datasets },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              type: "time",
+              time: { unit: "month" },
+              title: { display: true, text: "Date" },
+            },
+            y: {
+              min: 0,
+              max: 100,
+              title: { display: true, text: "Completion %" },
+            },
+          },
+        },
+      });
+    } catch (err) {
+      setAdminProgressChartMessage("Failed to load progress: " + (err.data?.error || err.message), true);
     }
   }
 
@@ -469,6 +581,8 @@
     setToken(null);
     showView("login");
   });
+
+  document.getElementById("admin-student-select").addEventListener("change", onAdminStudentSelectChange);
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", loadApp);

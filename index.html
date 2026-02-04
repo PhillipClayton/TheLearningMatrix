@@ -71,6 +71,16 @@
       <p id="admin-students-message" class="status hidden"></p>
       <div id="admin-students"></div>
 
+      <h3>View Student Progress</h3>
+      <div id="admin-progress-graph">
+        <label for="admin-student-select">Select student:</label>
+        <select id="admin-student-select"></select>
+        <p id="admin-progress-chart-message" class="status hidden"></p>
+        <div class="chart-container">
+          <canvas id="admin-progress-chart"></canvas>
+        </div>
+      </div>
+
       <h3>Courses</h3>
       <form id="admin-add-course-form">
         <label for="add-course-name">Course name</label>

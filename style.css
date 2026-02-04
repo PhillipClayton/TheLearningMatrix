@@ -167,3 +167,9 @@ body {
     display: none;
   }
   
+  #admin-progress-graph {
+    margin-bottom: 2em;
+  }
+  #admin-progress-graph .chart-container {
+    margin-top: 1em;
+  }
