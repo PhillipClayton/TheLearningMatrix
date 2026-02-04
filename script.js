@@ -139,7 +139,11 @@
       try {
         await api("/api/progress", {
           method: "POST",
-          body: JSON.stringify({ courseId: parseInt(input.dataset.courseId, 10), percentage: pct }),
+          body: JSON.stringify({
+            courseId: parseInt(input.dataset.courseId, 10),
+            percentage: pct,
+            date: new Date().toISOString().slice(0, 10),
+          }),
         });
         submitted++;
         input.value = "";
@@ -272,6 +276,8 @@
         adminProgressChart = null;
       }
       setAdminProgressChartMessage("", false);
+      document.getElementById("admin-progress-entries-empty").classList.add("hidden");
+      document.getElementById("admin-progress-entries").innerHTML = "";
       return;
     }
     await loadAdminProgressChart(studentId);
@@ -349,8 +355,66 @@
           },
         },
       });
+      renderAdminProgressEntries(studentId, progress, courses);
     } catch (err) {
       setAdminProgressChartMessage("Failed to load progress: " + (err.data?.error || err.message), true);
+      document.getElementById("admin-progress-entries-empty").classList.add("hidden");
+      document.getElementById("admin-progress-entries").innerHTML = "";
+    }
+  }
+
+  function renderAdminProgressEntries(studentId, progress, courses) {
+    const container = document.getElementById("admin-progress-entries");
+    const emptyEl = document.getElementById("admin-progress-entries-empty");
+    container.innerHTML = "";
+    const courseById = Object.fromEntries(courses.map((c) => [c.id, c]));
+    const sorted = progress.slice().sort((a, b) => new Date(b.recorded_at) - new Date(a.recorded_at));
+    if (sorted.length === 0) {
+      emptyEl.classList.remove("hidden");
+      return;
+    }
+    emptyEl.classList.add("hidden");
+    const table = document.createElement("table");
+    table.className = "admin-progress-entries-table";
+    table.innerHTML = "<thead><tr><th>Date</th><th>Course</th><th>%</th><th></th></tr></thead><tbody></tbody>";
+    const tbody = table.querySelector("tbody");
+    sorted.forEach((p) => {
+      const course = courseById[p.course_id];
+      const name = course ? course.name : "Course " + p.course_id;
+      const dateStr = formatProgressDate(p.recorded_at);
+      const tr = document.createElement("tr");
+      tr.dataset.progressId = p.id;
+      tr.innerHTML =
+        "<td>" +
+        escapeHtml(dateStr) +
+        "</td><td>" +
+        escapeHtml(name) +
+        "</td><td>" +
+        escapeHtml(String(p.percentage)) +
+        "</td><td>" +
+        (p.id != null
+          ? "<button type='button' class='admin-btn delete-progress-btn' title='Delete this entry'>Delete</button>"
+          : "<span class='muted'>—</span>") +
+        "</td>";
+      tbody.appendChild(tr);
+      const btn = tr.querySelector(".delete-progress-btn");
+      if (btn) btn.addEventListener("click", () => onDeleteProgressEntry(studentId, p.id));
+    });
+    container.appendChild(table);
+  }
+
+  function formatProgressDate(recordedAt) {
+    const d = new Date(recordedAt);
+    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  }
+
+  async function onDeleteProgressEntry(studentId, progressId) {
+    if (!confirm("Delete this progress entry? This cannot be undone.")) return;
+    try {
+      await api("/api/admin/students/" + studentId + "/progress/" + progressId, { method: "DELETE" });
+      await loadAdminProgressChart(studentId);
+    } catch (err) {
+      setAdminProgressChartMessage("Failed to delete: " + (err.data?.error || err.message), true);
     }
   }
 

@@ -173,3 +173,33 @@ body {
   #admin-progress-graph .chart-container {
     margin-top: 1em;
   }
+  #admin-progress-graph h4 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+  .muted {
+    color: #777;
+    font-size: 0.95em;
+  }
+  .admin-progress-entries-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5em;
+    font-size: 0.95em;
+  }
+  .admin-progress-entries-table th,
+  .admin-progress-entries-table td {
+    padding: 0.4em 0.6em;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  .admin-progress-entries-table th {
+    font-weight: 600;
+    color: #555;
+  }
+  .admin-progress-entries-table .delete-progress-btn {
+    background: #f44336;
+    color: white;
+    padding: 0.2em 0.5em;
+    font-size: 0.85em;
+  }
